@@ -70,7 +70,7 @@ public class DownloadService {
       }
     }
     catch (Exception e) {
-      logger.error("Exception while retrieving Download Requests: {} Terminating...", e.getMessage());
+      logger.error(e.getMessage());
       return 1;
     }
     finally {

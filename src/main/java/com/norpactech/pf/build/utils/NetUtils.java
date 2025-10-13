@@ -53,10 +53,19 @@ public class NetUtils {
       log.info("Download request failed: " + e.getMessage());
       throw e;
     }
-    int responseCode = response.code();
+    int responseCode = response.code();    
     if (responseCode > 299) {
-      log.info("Download request failed: " + response.message());
-      throw new RuntimeException("Failed : HTTP error code : " + responseCode);
+      
+      String msg = "";
+      try {
+        msg = response.body() != null ? response.body().string() : "";
+      }
+      catch (Exception e) {}
+
+      if (msg.isEmpty()) {
+        msg = "HTTP " + responseCode;
+      }
+      throw new RuntimeException("Download Failed: " + msg);
     }
     return new DownloadResponseVO(sourceDirectory, subPackageDirectory, projectComponent, responseCode, response.body().bytes());
   }
