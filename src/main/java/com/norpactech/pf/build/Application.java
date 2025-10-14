@@ -22,6 +22,7 @@ public class Application {
     String buildFile  = System.getenv("PARETO_BUILD_FILE");
     String factoryURL = System.getenv("PARETO_FACTORY_URL");
     String idTenant   = System.getenv("PARETO_TENANT_UUID");
+    String rootDir    = System.getenv("PARETO_PROJECT_ROOT");
 
     logger.info("Beginning Pareto Build");
 
@@ -50,8 +51,13 @@ public class Application {
       System.exit(1);
     }
     
+    if (StringUtils.isEmpty(rootDir)) {
+      logger.error("Null or empty Project Root Directory. Set environment variable: PARETO_PROJECT_ROOT. Terminating...");
+      System.exit(1);
+    }
+    
     logger.info("Pareto Build using file: {}", buildFile);
-    int retVal = DownloadService.downloadRequest(username, password, factoryURL, buildFile);
+    int retVal = DownloadService.downloadRequest(username, password, factoryURL, rootDir, buildFile);
     logger.info("Completed Pareto Build");
 
     System.exit(retVal);
