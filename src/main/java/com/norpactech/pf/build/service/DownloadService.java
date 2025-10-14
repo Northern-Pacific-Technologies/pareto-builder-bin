@@ -33,7 +33,12 @@ public class DownloadService {
 
   final static Logger logger = LoggerFactory.getLogger(DownloadService.class);
 
-  public static int downloadRequest(String username, String password, String paretoServerUrl, String rootDir, String buildFile) throws Exception {
+  public static int downloadRequest(
+      String username, 
+      String password, 
+      String paretoServerUrl, 
+      String sourceRootDir, 
+      String buildFile) throws Exception {
 
     var jwtRequest = new JwtRequestVO(username, password);
     var jwt = AuthUtils.getJwt(paretoServerUrl + "/access-token", jwtRequest);
@@ -54,14 +59,13 @@ public class DownloadService {
         var schema = TextUtils.toString(csvRecord.get("schema"));
         var project = TextUtils.toString(csvRecord.get("project"));
         var projectComponent = TextUtils.toString(csvRecord.get("project_component"));
-        var sourceDirectory = rootDir + "/" + TextUtils.toString(csvRecord.get("source_directory"));
         var subPackageDirectory = TextUtils.toString(csvRecord.get("sub_package_directory"));
         var downloadRequest = new DownloadRequestVO(tenant, schema, project, projectComponent);
         
         var downloadResponse = NetUtils.downloadRequest(
             paretoServerUrl, 
             jwt, 
-            sourceDirectory, 
+            sourceRootDir, 
             subPackageDirectory, 
             projectComponent, 
             downloadRequest);
