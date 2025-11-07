@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.norpactech.nc.config.load.ConfiguredAPI;
+import com.norpactech.nc.config.load.Globals;
 import com.norpactech.pf.build.service.DownloadService;
 
 public class Application {
@@ -17,49 +19,39 @@ public class Application {
 
   public static void main(String[] args) throws Exception {
   
-    String username      = System.getenv("PARETO_USERNAME");
-    String password      = System.getenv("PARETO_PASSWORD");
-    String buildFile     = System.getenv("PARETO_BUILD_FILE");
-    String factoryURL    = System.getenv("PARETO_FACTORY_URL");
-    String idTenant      = System.getenv("PARETO_TENANT_UUID");
-    String sourceRootDir = System.getenv("SOURCE_ROOT_DIR");
+    String buildFile = System.getenv("PARETO_BUILD_FILE");
+    String sourceRoot = System.getenv("SOURCE_ROOT_DIR");
 
-    logger.info("Beginning Pareto Build");
-
-    if (StringUtils.isEmpty(username)) {
-      logger.error("Null or empty username. Set environment variable: PARETO_USERNAME. Terminating...");
-      System.exit(1);
-    }
-    
-    if (StringUtils.isEmpty(password)) {
-      logger.error("Null or empty password. Set environment variable: PARETO_PASSWORD. Terminating...");
-      System.exit(1);
-    }
-    
     if (StringUtils.isEmpty(buildFile)) {
       logger.error("Null or empty build file. Set environment variable: PARETO_BUILD_FILE. Terminating...");
       System.exit(1);
     }
 
-    if (StringUtils.isEmpty(factoryURL)) {
-      logger.error("Null or empty Pareto Factory URL. Set environment variable: PARETO_FACTORY_URL. Terminating...");
+    if (StringUtils.isEmpty(sourceRoot)) {
+      logger.error("Null or empty build file. Set environment variable: SOURCE_ROOT_DIR. Terminating...");
       System.exit(1);
     }
 
-    if (StringUtils.isEmpty(idTenant)) {
-      logger.error("Null or empty Tenant UUID. Set environment variable: PARETO_TENANT_UUID. Terminating...");
-      System.exit(1);
-    }
-    
-    if (StringUtils.isEmpty(sourceRootDir)) {
-      logger.error("Null or empty Project Root Directory. Set environment variable: SOURCE_ROOT_DIR. Terminating...");
-      System.exit(1);
-    }
-    
-    logger.info("Pareto Build using file: {}", buildFile);
-    int retVal = DownloadService.downloadRequest(username, password, factoryURL, sourceRootDir, buildFile);
-    logger.info("Completed Pareto Build");
+    try {
+      
+      logger.info("Beginning Pareto Build");
+      
+      ConfiguredAPI.configure(Globals.PARETO_API_URL, Globals.PARETO_API_VERSION, Globals.PARETO_API_USERNAME, Globals.PARETO_API_PASSWORD);
+      logger.info("Pareto Build using file: {}", buildFile);
 
-    System.exit(retVal);
+      DownloadService.downloadRequest(
+        Globals.PARETO_API_USERNAME, 
+        Globals.PARETO_API_PASSWORD, 
+        Globals.PARETO_API_URL, 
+        sourceRoot, 
+        buildFile);
+      
+      logger.info("Completed Pareto Build");
+    }
+    catch (Exception e) {
+      logger.error("Pareto Factory Loader Terminated Unexpectedly: " + e.getMessage());
+      System.exit(1);
+    }    
+    System.exit(0);
   }
 }
